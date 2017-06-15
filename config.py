@@ -5,6 +5,7 @@ Testing using Python to interact to Cisco router via serial port
 import serial
 import sys
 import time
+import serial.tools.list_ports
 
 import credentials
 
@@ -92,16 +93,34 @@ def send_command(console, cmd=''):
     time.sleep(1)
     return read_serial(console)
 
+def port_selection():
+    i=1
+    portlist ={}
+    ports = list(serial.tools.list_ports.comports())
+    for entries in ports:
+        portlist.update({str(i): str(entries).split("-")})
+        i += 1
+    i=1
+    print("Select from below:")
+    for line in portlist:
+        print(str(i) + " : " + portlist[line][0] + "-" + portlist[line][1])
+        i += 1
+    selection = input('Select number for COM Port :')
+    comport = portlist[selection][0]
+    return comport
+
 
 def main():
     '''
     Testing using Python to interact to Cisco router via serial port
     '''
 
+    maincomport = port_selection()
+    test = "COM3"
     print("\nInitializing serial connection")
 
     console = serial.Serial(
-        port='COM3',
+        port=maincomport.strip(),
         baudrate=9600,
         parity="N",
         stopbits=1,
@@ -128,8 +147,13 @@ def main():
         print('WE got some 10/100 up in this place!')
     else:
         print('boo!')
-    print(str(send_command(console, cmd='config terminal\n'+ 'interface g0/20\n' + 'description bob\n' + 'end')))
-    print(str(send_command(console, cmd='sh run interface g0/20')))
+
+    with open("data.txt", "r") as myfile:
+        data = myfile.read()
+
+
+    print(str(send_command(console, cmd=data + '\n' + "end")))
+    2
 
 
 

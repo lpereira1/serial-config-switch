@@ -1,2 +1,2 @@
-username = 'lpereira1'
-password = 'Zrxpty12'
+username = 'admin'
+password = 'admin'
