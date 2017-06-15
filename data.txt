@@ -1,0 +1,12 @@
+copy run backup.txt
+
+
+config t
+Default interface g0/20
+Interface g0/20
+description Uplink to Viptela 1000 Ge0/3
+switchport trunk native vlan 999
+switchport trunk allowed vlan 1,10
+switchport mode trunk
+exit
+wr mem
