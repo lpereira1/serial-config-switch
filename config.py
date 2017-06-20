@@ -153,8 +153,6 @@ def main():
 
 
     print(str(send_command(console, cmd=data + '\n' + "end")))
-    2
-
 
 
 
