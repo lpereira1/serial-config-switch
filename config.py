@@ -138,11 +138,7 @@ def main():
     interfacebrieflist = []
     for i in interfacelist[1:]:
         interfacebrieflist.append(i.split())
-
-    for i in interfacebrieflist:
-        print(i[0])
-    print(interfacebrieflist[2][0])
-
+        
     if 'FastEthernet0/1' in interfacebrieflist:
         print('WE got some 10/100 up in this place!')
     else:
