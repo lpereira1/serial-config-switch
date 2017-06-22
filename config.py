@@ -1,7 +1,6 @@
 '''
-Testing using Python to interact to Cisco router via serial port
+This application will take input from a text file and send it via serial to cisco router/switch.
 '''
-
 import serial
 import sys
 import time
@@ -38,6 +37,19 @@ def check_logged_in(console):
     else:
         return False
 
+def enable_needed(console):
+    '''
+    Check if enable password is needed
+    '''
+    console.write("\r\n\r\n".encode())
+    time.sleep(1)
+    prompt = str(read_serial(console))
+    if '#' in prompt:
+        return True
+    else:
+        return False
+
+
 
 def login(console):
     '''
@@ -69,7 +81,15 @@ def login(console):
         if login_status:
             print("We are logged in\n")
             break
-
+    enabled = enable_needed(console)
+    print(enabled)
+    if not enabled:
+        console.write('enable'.encode() + "\n".encode())
+        time.sleep(1)
+        console.write(credentials.enable.encode() + "\n".encode())
+        time.sleep(1)
+    else:
+        print('in Enable already')
 
 def logout(console):
     '''
@@ -116,6 +136,7 @@ def main():
     '''
 
     maincomport = port_selection()
+
     test = "COM3"
     print("\nInitializing serial connection")
 
@@ -132,7 +153,6 @@ def main():
         sys.exit()
 
     login(console)
-    print(send_command(console, cmd='enable'))
     print(send_command(console, cmd='terminal length 0'))
     interfacelist = str(send_command(console, cmd='show ip int brief')).split('\\r\\n')
     interfacebrieflist = []
