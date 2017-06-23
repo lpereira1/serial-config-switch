@@ -111,7 +111,7 @@ def send_command(console, cmd=''):
     '''
     console.write(cmd.encode() + '\n'.encode())
     time.sleep(1)
-    return read_serial(console)
+    return read_serial(console).decode()
 
 def port_selection():
     i=1
@@ -129,6 +129,45 @@ def port_selection():
     comport = portlist[selection][0]
     return comport
 
+def uplink_switches():
+    while True:
+        isthereuplink = input('Is there more than one Cisco Switch? (Y/n)')
+        print(isthereuplink)
+        if isthereuplink.lower() == 'y' or isthereuplink.lower() == 'yes':
+            return True
+
+        if isthereuplink.lower() == 'n' or isthereuplink.lower() == 'no':
+            return False
+
+        print("you have made an invalid choice, try again.")
+
+
+
+
+
+
+def interface_choice(console):
+    interfaces = str(send_command(console, cmd='show cdp nei')).split('\\r\\n')
+    print(interfaces)
+    interfacelist= []
+    for i in interfaces[1:]:
+        interfacelist.append(i.split())
+    count = 1
+    for line in interfacelist[1:-1]:
+        print(str(count)+ ":  " + str(line))
+        count += 1
+    try:
+        uplink1 = interfacelist[int(input('Select first uplink interface from the list: '))][0]
+    except:
+        uplink1 = 'g0/2'
+    try:
+        uplink2 = interfacelist[int(input('Select second uplink interface from the list: '))][0]
+    except:
+        uplink2 = 'g0/1'
+    return {'uplink1': uplink1 , 'uplink2' : uplink2 }
+
+
+
 
 def main():
     '''
@@ -136,8 +175,10 @@ def main():
     '''
 
     maincomport = port_selection()
+    needuplink = uplink_switches()
+    print(needuplink)
 
-    test = "COM3"
+
     print("\nInitializing serial connection")
 
     console = serial.Serial(
@@ -156,6 +197,12 @@ def main():
     print(send_command(console, cmd='terminal length 0'))
     interfacelist = str(send_command(console, cmd='show ip int brief')).split('\\r\\n')
     interfacebrieflist = []
+
+    if needuplink == True :
+        choice = interface_choice(console)
+        print(choice)
+
+
     for i in interfacelist[1:]:
         interfacebrieflist.append(i.split())
         
@@ -166,6 +213,8 @@ def main():
 
     with open("data.txt", "r") as myfile:
         data = myfile.read()
+
+
 
 
     print(str(send_command(console, cmd=data + '\n' + "end")))
